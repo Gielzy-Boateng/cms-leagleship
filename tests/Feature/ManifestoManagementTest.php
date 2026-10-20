@@ -33,7 +33,7 @@ test('admin can create a manifesto entry from the dashboard', function () {
 test('saving a manifesto entry sanitises the rich text body', function () {
     Livewire::test(ManifestoForm::class)
         ->set('title', 'The Leagle Creed')
-        ->set('body', '<p>We lead.</p><script>alert("boom")</script><img src="x" onerror="steal()"><a href="https://example.com" onclick="track()">read the creed</a>')
+        ->set('body', '<p>We lead.</p><script>alert("boom")</script><img src="x" onerror="steal()"><a href="https://example.com" onclick="track()">read the creed</a><a href="/events">see what is next</a>')
         ->call('save')
         ->assertHasNoErrors();
 
@@ -43,7 +43,8 @@ test('saving a manifesto entry sanitises the rich text body', function () {
         ->and($body)->not->toContain('onerror')
         ->and($body)->not->toContain('onclick')
         ->and($body)->toContain('<p>We lead.</p>')
-        ->and($body)->toContain('<a href="https://example.com">read the creed</a>');
+        ->and($body)->toContain('<a href="https://example.com">read the creed</a>')
+        ->and($body)->toContain('<a href="/events">see what is next</a>');
 });
 
 test('saving a manifesto entry requires visible text in the body', function () {

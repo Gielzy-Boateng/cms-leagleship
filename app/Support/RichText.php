@@ -32,7 +32,7 @@ class RichText
      */
     public static function sanitize(string $html): string
     {
-        $config = new HtmlSanitizerConfig;
+        $config = (new HtmlSanitizerConfig)->allowRelativeLinks();
 
         foreach (self::ALLOWED_ELEMENTS as $element => $attributes) {
             $config = $config->allowElement($element, $attributes);
