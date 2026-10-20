@@ -1,6 +1,6 @@
 /.phpunit.cache
 /node_modules
-/public/build
+# public/build is committed so hosts deploy with composer only (run `npm run build` before committing changes)
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage

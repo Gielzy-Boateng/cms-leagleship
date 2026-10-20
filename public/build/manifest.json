@@ -1,0 +1,45 @@
+{
+  "_fonts-UOOEjT_m.css": {
+    "file": "assets/fonts-UOOEjT_m.css",
+    "src": "_fonts-UOOEjT_m.css"
+  },
+  "_roboto-400-normal-BqEyEoaF.woff2": {
+    "file": "assets/roboto-400-normal-BqEyEoaF.woff2",
+    "src": "_roboto-400-normal-BqEyEoaF.woff2"
+  },
+  "_roboto-400-normal-D27F5sTu.woff": {
+    "file": "assets/roboto-400-normal-D27F5sTu.woff",
+    "src": "_roboto-400-normal-D27F5sTu.woff"
+  },
+  "_roboto-500-normal-7RbcRiD8.woff2": {
+    "file": "assets/roboto-500-normal-7RbcRiD8.woff2",
+    "src": "_roboto-500-normal-7RbcRiD8.woff2"
+  },
+  "_roboto-500-normal-fsTFPL3E.woff": {
+    "file": "assets/roboto-500-normal-fsTFPL3E.woff",
+    "src": "_roboto-500-normal-fsTFPL3E.woff"
+  },
+  "_roboto-700-normal-BZpUvMxY.woff2": {
+    "file": "assets/roboto-700-normal-BZpUvMxY.woff2",
+    "src": "_roboto-700-normal-BZpUvMxY.woff2"
+  },
+  "_roboto-700-normal-YuyVweIx.woff": {
+    "file": "assets/roboto-700-normal-YuyVweIx.woff",
+    "src": "_roboto-700-normal-YuyVweIx.woff"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-yqfe2pZu.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-DhtUy-am.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  }
+}
