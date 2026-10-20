@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use RuntimeException;
 
 class DatabaseSeeder extends Seeder
 {
@@ -22,19 +23,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::query()->firstOrCreate(
-            ['email' => 'test@example.com'],
-            ['name' => 'Test User', 'password' => Hash::make('password')],
-        );
-
-        User::query()->firstOrCreate(
-            ['email' => 'admin@cms.local'],
-            [
-                'name' => 'CMS Admin',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ],
-        );
+        $this->seedAdmin();
 
         Event::query()->firstOrCreate(
             ['slug' => 'community-launch-meetup'],
@@ -190,5 +179,30 @@ class DatabaseSeeder extends Seeder
                 'footer_note' => '© '.now()->year.' Diba Leagleship Institute. All rights reserved.',
             ]);
         }
+    }
+
+    /**
+     * The CMS sign-in, driven by the environment so credentials stay out of the repository.
+     */
+    protected function seedAdmin(): void
+    {
+        $password = config('admin.password');
+
+        if (blank($password)) {
+            if (! app()->isLocal()) {
+                throw new RuntimeException('Set ADMIN_PASSWORD before seeding the CMS administrator.');
+            }
+
+            $password = 'password';
+        }
+
+        User::query()->updateOrCreate(
+            ['email' => config('admin.email')],
+            [
+                'name' => config('admin.name'),
+                'password' => Hash::make($password),
+                'email_verified_at' => now(),
+            ],
+        );
     }
 }
