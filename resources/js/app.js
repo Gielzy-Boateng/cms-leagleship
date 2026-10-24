@@ -4,6 +4,7 @@ import StarterKit from '@tiptap/starter-kit';
 // PHP's upload_max_filesize defaults to 2M on many hosts and cannot be raised from app code,
 // so anything above this budget is re-encoded in the browser before it reaches Livewire.
 const UPLOAD_BYTE_BUDGET = 1_500_000;
+const UPLOAD_RECOMPRESS_OVER = 400_000;
 const UPLOAD_MAX_EDGE = 1920;
 
 function encode(canvas, quality) {
@@ -181,7 +182,7 @@ document.addEventListener('alpine:init', () => {
             try {
                 wire.upload(
                     model,
-                    file.size > UPLOAD_BYTE_BUDGET ? await optimiseForUpload(file) : file,
+                    file.size > UPLOAD_RECOMPRESS_OVER ? await optimiseForUpload(file) : file,
                     () => { this.busy = false; },
                     () => {
                         this.busy = false;

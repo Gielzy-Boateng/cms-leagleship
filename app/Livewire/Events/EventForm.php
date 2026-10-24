@@ -4,6 +4,7 @@ namespace App\Livewire\Events;
 
 use App\Enums\PublicationStatus;
 use App\Models\Event;
+use App\Support\ImageOptimizer;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -74,7 +75,7 @@ class EventForm extends Component
         ];
 
         if ($this->imageUpload) {
-            $data['image'] = $this->imageUpload->store('events', 'public');
+            $data['image'] = ImageOptimizer::store($this->imageUpload, 'events');
         } elseif ($this->removeImage) {
             $this->deleteStoredImage();
             $data['image'] = null;

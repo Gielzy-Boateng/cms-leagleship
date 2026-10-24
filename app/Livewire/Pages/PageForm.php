@@ -4,6 +4,7 @@ namespace App\Livewire\Pages;
 
 use App\Enums\PublicationStatus;
 use App\Models\Page;
+use App\Support\ImageOptimizer;
 use App\Support\PageBlocks;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -147,7 +148,7 @@ class PageForm extends Component
                 continue;
             }
 
-            $blocks[$index]['src'] = $upload->store('pages', 'public');
+            $blocks[$index]['src'] = ImageOptimizer::store($upload, 'pages');
         }
 
         return $blocks;

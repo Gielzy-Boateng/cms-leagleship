@@ -4,6 +4,7 @@ namespace App\Livewire\Manifestos;
 
 use App\Enums\PublicationStatus;
 use App\Models\Manifesto;
+use App\Support\ImageOptimizer;
 use App\Support\RichText;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -81,7 +82,7 @@ class ManifestoForm extends Component
         ];
 
         if ($this->imageUpload) {
-            $data['image'] = $this->imageUpload->store('manifestos', 'public');
+            $data['image'] = ImageOptimizer::store($this->imageUpload, 'manifestos');
         } elseif ($this->removeImage) {
             $this->deleteStoredImage();
             $data['image'] = null;

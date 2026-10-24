@@ -4,6 +4,7 @@ namespace App\Livewire\Programs;
 
 use App\Enums\PublicationStatus;
 use App\Models\Program;
+use App\Support\ImageOptimizer;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -69,7 +70,7 @@ class ProgramForm extends Component
         ];
 
         if ($this->imageUpload) {
-            $data['image'] = $this->imageUpload->store('programs', 'public');
+            $data['image'] = ImageOptimizer::store($this->imageUpload, 'programs');
         } elseif ($this->removeImage) {
             $this->deleteStoredImage();
             $data['image'] = null;
