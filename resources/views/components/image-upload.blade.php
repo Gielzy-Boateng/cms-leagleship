@@ -8,5 +8,5 @@
         <x-icon name="progress_activity" class="text-[14px]! animate-spin" /> Optimising image…
     </p>
 
-    <p class="mt-1 text-xs text-gray-400">JPG, PNG or WebP. Anything over 1.5 MB is resized in your browser first.</p>
+    <p class="mt-1 text-xs text-gray-400">JPG, PNG or WebP. Anything over 400 KB is compressed in your browser, then resized on the server.</p>
 </div>
