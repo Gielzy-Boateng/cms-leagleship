@@ -27,8 +27,11 @@
                 Remember me
             </label>
 
-            <button type="submit" class="w-full rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-semibold text-navy-900 shadow-sm transition hover:bg-gold-600 hover:text-white">
-                Sign in
+            <button type="submit" wire:loading.attr="disabled" wire:target="login"
+                    class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gold-500 px-4 py-2.5 text-sm font-semibold text-navy-900 shadow-sm transition hover:bg-gold-600 hover:text-white disabled:cursor-wait disabled:opacity-70">
+                <x-icon name="progress_activity" wire:loading wire:target="login" style="display: none" class="text-[16px]! animate-spin" />
+                <span wire:loading.remove wire:target="login">Sign in</span>
+                <span wire:loading wire:target="login" style="display: none">Signing in…</span>
             </button>
         </form>
     </div>

@@ -146,8 +146,11 @@
         <a href="/api/site" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-navy-800">
             <x-icon name="code-bracket" class="text-[16px]" /> /api/site
         </a>
-        <button type="submit" class="rounded-lg bg-gold-500 px-5 py-2 text-sm font-semibold text-navy-900 shadow-sm transition hover:bg-gold-600 hover:text-white">
-            Save settings
+        <button type="submit" wire:loading.attr="disabled" wire:target="save"
+                class="inline-flex items-center gap-2 rounded-lg bg-gold-500 px-5 py-2 text-sm font-semibold text-navy-900 shadow-sm transition hover:bg-gold-600 hover:text-white disabled:cursor-wait disabled:opacity-70">
+            <x-icon name="progress_activity" wire:loading wire:target="save" style="display: none" class="text-[16px]! animate-spin" />
+            <span wire:loading.remove wire:target="save">Save settings</span>
+            <span wire:loading wire:target="save" style="display: none">Saving…</span>
         </button>
     </div>
 </form>

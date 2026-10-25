@@ -78,12 +78,19 @@
         <div class="flex items-center gap-2">
             @if ($event !== null)
                 <button type="button" wire:click="delete" wire:confirm="Delete this event?"
-                        class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50">
-                    <x-icon name="trash" class="text-[16px]" /> Delete
+                        wire:loading.attr="disabled" wire:target="delete"
+                        class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-wait disabled:opacity-60">
+                    <x-icon name="trash" wire:loading.remove wire:target="delete" class="text-[16px]" />
+                    <x-icon name="progress_activity" wire:loading wire:target="delete" style="display: none" class="text-[16px]! animate-spin" />
+                    <span wire:loading.remove wire:target="delete">Delete</span>
+                    <span wire:loading wire:target="delete" style="display: none">Deleting…</span>
                 </button>
             @endif
-            <button type="submit" class="rounded-lg bg-gold-500 px-5 py-2 text-sm font-semibold text-navy-900 shadow-sm transition hover:bg-gold-600 hover:text-white">
-                {{ $event !== null ? 'Save changes' : 'Create event' }}
+            <button type="submit" wire:loading.attr="disabled" wire:target="save"
+                    class="inline-flex items-center gap-2 rounded-lg bg-gold-500 px-5 py-2 text-sm font-semibold text-navy-900 shadow-sm transition hover:bg-gold-600 hover:text-white disabled:cursor-wait disabled:opacity-70">
+                <x-icon name="progress_activity" wire:loading wire:target="save" style="display: none" class="text-[16px]! animate-spin" />
+                <span wire:loading.remove wire:target="save">{{ $event !== null ? 'Save changes' : 'Create event' }}</span>
+                <span wire:loading wire:target="save" style="display: none">Saving…</span>
             </button>
         </div>
     </div>

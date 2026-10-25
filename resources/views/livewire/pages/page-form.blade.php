@@ -47,16 +47,22 @@
 
                     <div class="flex items-center gap-0.5">
                         <button type="button" wire:click="moveBlock({{ $index }}, 'up')" title="Move up" @disabled($index === 0)
+                                wire:loading.attr="disabled" wire:target="moveBlock({{ $index }}, 'up')"
                                 class="rounded-lg p-1.5 text-gray-400 transition hover:bg-yellow-100 hover:text-navy-800 disabled:pointer-events-none disabled:opacity-30">
-                            <x-icon name="arrow-upward" class="text-[18px]!" />
+                            <x-icon name="arrow-upward" wire:loading.remove wire:target="moveBlock({{ $index }}, 'up')" class="text-[18px]!" />
+                            <x-icon name="progress_activity" wire:loading wire:target="moveBlock({{ $index }}, 'up')" style="display: none" class="text-[18px]! animate-spin" />
                         </button>
                         <button type="button" wire:click="moveBlock({{ $index }}, 'down')" title="Move down" @disabled($index === count($blocks) - 1)
+                                wire:loading.attr="disabled" wire:target="moveBlock({{ $index }}, 'down')"
                                 class="rounded-lg p-1.5 text-gray-400 transition hover:bg-yellow-100 hover:text-navy-800 disabled:pointer-events-none disabled:opacity-30">
-                            <x-icon name="arrow-downward" class="text-[18px]!" />
+                            <x-icon name="arrow-downward" wire:loading.remove wire:target="moveBlock({{ $index }}, 'down')" class="text-[18px]!" />
+                            <x-icon name="progress_activity" wire:loading wire:target="moveBlock({{ $index }}, 'down')" style="display: none" class="text-[18px]! animate-spin" />
                         </button>
                         <button type="button" wire:click="removeBlock({{ $index }})" wire:confirm="Remove this block?" title="Remove"
-                                class="rounded-lg p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-600">
-                            <x-icon name="trash" class="text-[18px]!" />
+                                wire:loading.attr="disabled" wire:target="removeBlock({{ $index }})"
+                                class="rounded-lg p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-600 disabled:pointer-events-none disabled:opacity-30">
+                            <x-icon name="trash" wire:loading.remove wire:target="removeBlock({{ $index }})" class="text-[18px]!" />
+                            <x-icon name="progress_activity" wire:loading wire:target="removeBlock({{ $index }})" style="display: none" class="text-[18px]! animate-spin" />
                         </button>
                     </div>
                 </div>
@@ -119,8 +125,11 @@
         </select>
 
         <button type="button" x-on:click="$wire.addBlock(type)"
-                class="inline-flex items-center gap-1.5 rounded-lg bg-navy-800 px-4 py-2 text-sm font-medium text-white transition hover:bg-navy-700">
-            <x-icon name="plus" class="text-[16px]" /> Add
+                wire:loading.attr="disabled" wire:target="addBlock"
+                class="inline-flex items-center gap-1.5 rounded-lg bg-navy-800 px-4 py-2 text-sm font-medium text-white transition hover:bg-navy-700 disabled:cursor-wait disabled:opacity-60">
+            <x-icon name="plus" wire:loading.remove wire:target="addBlock" class="text-[16px]" />
+            <x-icon name="progress_activity" wire:loading wire:target="addBlock" style="display: none" class="text-[16px]! animate-spin" />
+            Add
         </button>
 
         <p class="w-full text-xs text-gray-400 sm:w-auto sm:flex-1">Blocks are published to the website in this order.</p>
@@ -131,12 +140,19 @@
         <div class="flex items-center gap-2">
             @if ($page !== null)
                 <button type="button" wire:click="delete" wire:confirm="Delete this page?"
-                        class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50">
-                    <x-icon name="trash" class="text-[16px]" /> Delete
+                        wire:loading.attr="disabled" wire:target="delete"
+                        class="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-wait disabled:opacity-60">
+                    <x-icon name="trash" wire:loading.remove wire:target="delete" class="text-[16px]" />
+                    <x-icon name="progress_activity" wire:loading wire:target="delete" style="display: none" class="text-[16px]! animate-spin" />
+                    <span wire:loading.remove wire:target="delete">Delete</span>
+                    <span wire:loading wire:target="delete" style="display: none">Deleting…</span>
                 </button>
             @endif
-            <button type="submit" class="rounded-lg bg-gold-500 px-5 py-2 text-sm font-semibold text-navy-900 shadow-sm transition hover:bg-gold-600 hover:text-white">
-                {{ $page !== null ? 'Save changes' : 'Create page' }}
+            <button type="submit" wire:loading.attr="disabled" wire:target="save"
+                    class="inline-flex items-center gap-2 rounded-lg bg-gold-500 px-5 py-2 text-sm font-semibold text-navy-900 shadow-sm transition hover:bg-gold-600 hover:text-white disabled:cursor-wait disabled:opacity-70">
+                <x-icon name="progress_activity" wire:loading wire:target="save" style="display: none" class="text-[16px]! animate-spin" />
+                <span wire:loading.remove wire:target="save">{{ $page !== null ? 'Save changes' : 'Create page' }}</span>
+                <span wire:loading wire:target="save" style="display: none">Saving…</span>
             </button>
         </div>
     </div>

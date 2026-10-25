@@ -12,7 +12,9 @@
     <div class="relative">
         <x-icon name="search" class="pointer-events-none absolute left-3 top-1/2 text-[16px]! -translate-y-1/2 text-gray-400" />
         <input type="search" wire:model.live.debounce.300ms="search" placeholder="Search manifestos…"
-               class="w-full rounded-lg border border-yellow-200 bg-white py-2 pl-9 pr-3 text-sm shadow-sm placeholder:text-gray-400 focus:border-gold-500 focus:outline-none focus:ring-1 focus:ring-gold-500" />
+               class="w-full rounded-lg border border-yellow-200 bg-white py-2 pl-9 pr-9 text-sm shadow-sm placeholder:text-gray-400 focus:border-gold-500 focus:outline-none focus:ring-1 focus:ring-gold-500" />
+        <x-icon name="progress_activity" wire:loading wire:target="search" style="display: none"
+                class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[16px]! animate-spin text-gold-600" />
     </div>
 </div>
 
@@ -33,24 +35,32 @@
             >
                 <x-slot:actions>
                     <button wire:click="move({{ $manifesto->id }}, 'up')" title="Move up"
-                            class="rounded-lg p-1.5 text-gray-400 transition hover:bg-white hover:text-navy-800">
-                        <x-icon name="arrow-upward" class="text-[18px]!" />
+                            wire:loading.attr="disabled" wire:target="move({{ $manifesto->id }}, 'up')"
+                            class="rounded-lg p-1.5 text-gray-400 transition hover:bg-white hover:text-navy-800 disabled:cursor-wait disabled:opacity-50">
+                        <x-icon name="arrow-upward" wire:loading.remove wire:target="move({{ $manifesto->id }}, 'up')" class="text-[18px]!" />
+                        <x-icon name="progress_activity" wire:loading wire:target="move({{ $manifesto->id }}, 'up')" style="display: none" class="text-[18px]! animate-spin" />
                     </button>
                     <button wire:click="move({{ $manifesto->id }}, 'down')" title="Move down"
-                            class="rounded-lg p-1.5 text-gray-400 transition hover:bg-white hover:text-navy-800">
-                        <x-icon name="arrow-downward" class="text-[18px]!" />
+                            wire:loading.attr="disabled" wire:target="move({{ $manifesto->id }}, 'down')"
+                            class="rounded-lg p-1.5 text-gray-400 transition hover:bg-white hover:text-navy-800 disabled:cursor-wait disabled:opacity-50">
+                        <x-icon name="arrow-downward" wire:loading.remove wire:target="move({{ $manifesto->id }}, 'down')" class="text-[18px]!" />
+                        <x-icon name="progress_activity" wire:loading wire:target="move({{ $manifesto->id }}, 'down')" style="display: none" class="text-[18px]! animate-spin" />
                     </button>
                     <button wire:click="toggleStatus({{ $manifesto->id }})" title="{{ $manifesto->status === \App\Enums\PublicationStatus::Published ? 'Unpublish' : 'Publish' }}"
-                            class="rounded-lg p-1.5 text-gray-400 transition hover:bg-white hover:text-navy-800">
-                        <x-icon :name="$manifesto->status === \App\Enums\PublicationStatus::Published ? 'eye-slash' : 'eye'" class="text-[18px]!" />
+                            wire:loading.attr="disabled" wire:target="toggleStatus({{ $manifesto->id }})"
+                            class="rounded-lg p-1.5 text-gray-400 transition hover:bg-white hover:text-navy-800 disabled:cursor-wait disabled:opacity-50">
+                        <x-icon :name="$manifesto->status === \App\Enums\PublicationStatus::Published ? 'eye-slash' : 'eye'" wire:loading.remove wire:target="toggleStatus({{ $manifesto->id }})" class="text-[18px]!" />
+                        <x-icon name="progress_activity" wire:loading wire:target="toggleStatus({{ $manifesto->id }})" style="display: none" class="text-[18px]! animate-spin" />
                     </button>
                     <a href="{{ route('manifestos.edit', $manifesto) }}" wire:navigate title="Edit"
                        class="rounded-lg p-1.5 text-gray-400 transition hover:bg-white hover:text-navy-800">
                         <x-icon name="pencil" class="text-[18px]!" />
                     </a>
                     <button wire:click="destroy({{ $manifesto->id }})" wire:confirm="Delete this manifesto entry?" title="Delete"
-                            class="rounded-lg p-1.5 text-gray-400 transition hover:bg-white hover:text-red-600">
-                        <x-icon name="trash" class="text-[18px]!" />
+                            wire:loading.attr="disabled" wire:target="destroy({{ $manifesto->id }})"
+                            class="rounded-lg p-1.5 text-gray-400 transition hover:bg-white hover:text-red-600 disabled:cursor-wait disabled:opacity-50">
+                        <x-icon name="trash" wire:loading.remove wire:target="destroy({{ $manifesto->id }})" class="text-[18px]!" />
+                        <x-icon name="progress_activity" wire:loading wire:target="destroy({{ $manifesto->id }})" style="display: none" class="text-[18px]! animate-spin" />
                     </button>
                 </x-slot:actions>
             </x-resource-row>

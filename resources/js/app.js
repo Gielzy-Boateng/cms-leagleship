@@ -49,8 +49,8 @@ async function optimiseForUpload(file) {
     return new File([blob], name, { type: blob.type, lastModified: Date.now() });
 }
 
-function notify(message) {
-    window.dispatchEvent(new CustomEvent('toast', { detail: { message } }));
+function notify(message, type = 'success') {
+    window.dispatchEvent(new CustomEvent('toast', { detail: { message, type } }));
 }
 
 document.addEventListener('alpine:init', () => {
@@ -186,12 +186,12 @@ document.addEventListener('alpine:init', () => {
                     () => { this.busy = false; },
                     () => {
                         this.busy = false;
-                        notify('Upload failed. Try a smaller image.');
+                        notify('Upload failed. Try a smaller image.', 'error');
                     },
                 );
             } catch {
                 this.busy = false;
-                notify('Could not read that image. Try a different file.');
+                notify('Could not read that image. Try a different file.', 'error');
             }
         },
     }));
