@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Support\ImageOptimizer;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -33,6 +34,9 @@ class EventForm extends Component
     public string $title = '';
 
     #[Validate(['nullable', 'string', 'max:255'])]
+    public string $slug = '';
+
+    #[Validate(['nullable', 'string', 'max:255'])]
     public string $location = '';
 
     #[Validate(['nullable', 'string'])]
@@ -53,6 +57,7 @@ class EventForm extends Component
 
         if ($event) {
             $this->title = $event->title;
+            $this->slug = $event->slug;
             $this->location = $event->location ?? '';
             $this->description = $event->description ?? '';
             $this->startsAt = $event->starts_at?->format('Y-m-d\TH:i') ?? '';
@@ -65,6 +70,14 @@ class EventForm extends Component
     {
         $this->validate();
 
+        $slug = Str::slug($this->slug);
+
+        if ($slug !== '' && Event::slugTaken($slug, $this->event?->id)) {
+            $this->addError('slug', 'That slug is already in use by another event.');
+
+            return;
+        }
+
         $data = [
             'title' => $this->title,
             'location' => $this->location ?: null,
@@ -73,6 +86,10 @@ class EventForm extends Component
             'ends_at' => $this->endsAt ? Carbon::parse($this->endsAt) : null,
             'status' => PublicationStatus::from($this->status),
         ];
+
+        if ($slug !== '') {
+            $data['slug'] = $slug;
+        }
 
         if ($this->imageUpload) {
             $data['image'] = ImageOptimizer::store($this->imageUpload, 'events');

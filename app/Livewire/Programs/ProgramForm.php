@@ -7,6 +7,7 @@ use App\Models\Program;
 use App\Support\ImageOptimizer;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -35,6 +36,9 @@ class ProgramForm extends Component
     #[Validate(['required', 'string', 'max:255'])]
     public string $title = '';
 
+    #[Validate(['nullable', 'string', 'max:255'])]
+    public string $slug = '';
+
     #[Validate(['nullable', 'string'])]
     public string $description = '';
 
@@ -50,6 +54,7 @@ class ProgramForm extends Component
 
         if ($program) {
             $this->title = $program->title;
+            $this->slug = $program->slug;
             $this->description = $program->description ?? '';
             $this->startsAt = $program->starts_at?->format('Y-m-d') ?? '';
             $this->link = $program->link ?? '';
@@ -61,6 +66,14 @@ class ProgramForm extends Component
     {
         $this->validate();
 
+        $slug = Str::slug($this->slug);
+
+        if ($slug !== '' && Program::slugTaken($slug, $this->program?->id)) {
+            $this->addError('slug', 'That slug is already in use by another program.');
+
+            return;
+        }
+
         $data = [
             'title' => $this->title,
             'description' => $this->description ?: null,
@@ -68,6 +81,10 @@ class ProgramForm extends Component
             'link' => $this->link ?: null,
             'status' => PublicationStatus::from($this->status),
         ];
+
+        if ($slug !== '') {
+            $data['slug'] = $slug;
+        }
 
         if ($this->imageUpload) {
             $data['image'] = ImageOptimizer::store($this->imageUpload, 'programs');

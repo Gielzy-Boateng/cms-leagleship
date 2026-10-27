@@ -63,12 +63,22 @@ class Program extends Model
         $candidate = $base;
         $suffix = 2;
 
-        while (static::where('slug', $candidate)->when($ignoreId, fn (Builder $q) => $q->whereKeyNot($ignoreId))->exists()) {
+        while (static::slugTaken($candidate, $ignoreId)) {
             $candidate = "{$base}-{$suffix}";
             $suffix++;
         }
 
         return $candidate;
+    }
+
+    /**
+     * Whether the slug is already used by another record.
+     */
+    public static function slugTaken(string $slug, ?int $ignoreId = null): bool
+    {
+        return static::where('slug', $slug)
+            ->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))
+            ->exists();
     }
 
     /**

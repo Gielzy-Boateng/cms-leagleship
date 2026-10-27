@@ -30,6 +30,30 @@ test('admin can create a manifesto entry from the dashboard', function () {
         ->and($manifesto->body)->toContain('<p>Every programme starts from one question.</p>');
 });
 
+test('admin can set the manifesto slug from the dashboard', function () {
+    Livewire::test(ManifestoForm::class)
+        ->set('title', 'We lead by serving')
+        ->set('slug', 'leading by serving')
+        ->set('body', '<p>Every programme starts from one question.</p>')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Manifesto::firstWhere('title', 'We lead by serving')->slug)->toBe('leading-by-serving');
+});
+
+test('a slug already used by another manifesto is rejected', function () {
+    Manifesto::factory()->create(['title' => 'Existing', 'slug' => 'existing-belief']);
+
+    Livewire::test(ManifestoForm::class)
+        ->set('title', 'Another Belief')
+        ->set('slug', 'existing-belief')
+        ->set('body', '<p>A second belief.</p>')
+        ->call('save')
+        ->assertHasErrors(['slug']);
+
+    expect(Manifesto::count())->toBe(1);
+});
+
 test('saving a manifesto entry sanitises the rich text body', function () {
     Livewire::test(ManifestoForm::class)
         ->set('title', 'The Leagle Creed')

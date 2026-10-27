@@ -27,6 +27,9 @@ class PageForm extends Component
     #[Validate(['required', 'string', 'max:255'])]
     public string $title = '';
 
+    #[Validate(['nullable', 'string', 'max:255'])]
+    public string $slug = '';
+
     #[Validate(['required', 'string'])]
     public string $status = PublicationStatus::Draft->value;
 
@@ -49,6 +52,7 @@ class PageForm extends Component
 
         if ($page) {
             $this->title = $page->title;
+            $this->slug = $page->slug;
             $this->status = $page->status->value;
             $this->blocks = $this->withIds($page->blocks());
 
@@ -86,6 +90,15 @@ class PageForm extends Component
     public function save(): void
     {
         $this->validate();
+
+        $slug = Str::slug($this->slug);
+
+        if ($slug !== '' && Page::slugTaken($slug, $this->page?->id)) {
+            $this->addError('slug', 'That slug is already in use by another page.');
+
+            return;
+        }
+
         $this->validate(array_merge(PageBlocks::rules(), [
             'imageUploads.*' => ['nullable', 'image', 'max:4096', 'mimes:jpg,jpeg,png,webp'],
         ]));
@@ -106,6 +119,10 @@ class PageForm extends Component
             'status' => PublicationStatus::from($this->status),
             'content' => $normalized,
         ];
+
+        if ($slug !== '') {
+            $data['slug'] = $slug;
+        }
 
         $page = $this->page
             ? tap($this->page)->update($data)

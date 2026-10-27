@@ -7,6 +7,7 @@ use App\Models\Manifesto;
 use App\Support\ImageOptimizer;
 use App\Support\RichText;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -25,6 +26,9 @@ class ManifestoForm extends Component
 
     #[Validate(['required', 'string', 'max:255'])]
     public string $title = '';
+
+    #[Validate(['nullable', 'string', 'max:255'])]
+    public string $slug = '';
 
     #[Validate(['nullable', 'string', 'max:255'])]
     public string $excerpt = '';
@@ -50,6 +54,7 @@ class ManifestoForm extends Component
 
         if ($manifesto) {
             $this->title = $manifesto->title;
+            $this->slug = $manifesto->slug;
             $this->excerpt = $manifesto->excerpt ?? '';
             $this->body = $manifesto->body;
             $this->sortOrder = (string) $manifesto->sort_order;
@@ -64,6 +69,14 @@ class ManifestoForm extends Component
     public function save(): void
     {
         $this->validate();
+
+        $slug = Str::slug($this->slug);
+
+        if ($slug !== '' && Manifesto::slugTaken($slug, $this->manifesto?->id)) {
+            $this->addError('slug', 'That slug is already in use by another entry.');
+
+            return;
+        }
 
         $body = RichText::sanitize($this->body);
 
@@ -80,6 +93,10 @@ class ManifestoForm extends Component
             'sort_order' => (int) $this->sortOrder,
             'status' => PublicationStatus::from($this->status),
         ];
+
+        if ($slug !== '') {
+            $data['slug'] = $slug;
+        }
 
         if ($this->imageUpload) {
             $data['image'] = ImageOptimizer::store($this->imageUpload, 'manifestos');

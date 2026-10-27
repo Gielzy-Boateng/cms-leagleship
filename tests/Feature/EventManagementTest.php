@@ -37,6 +37,50 @@ test('event creation requires a title', function () {
         ->assertHasErrors(['title' => 'required']);
 });
 
+test('admin can set the event slug from the dashboard', function () {
+    Livewire::test(EventForm::class)
+        ->set('title', 'Town Hall')
+        ->set('slug', ' Annual Town Hall 2026 ')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Event::firstWhere('title', 'Town Hall')->slug)->toBe('annual-town-hall-2026');
+});
+
+test('a slug already used by another event is rejected', function () {
+    Event::factory()->create(['title' => 'Launch Night', 'slug' => 'launch-night']);
+
+    Livewire::test(EventForm::class)
+        ->set('title', 'Closing Night')
+        ->set('slug', 'launch-night')
+        ->call('save')
+        ->assertHasErrors(['slug']);
+
+    expect(Event::count())->toBe(1);
+});
+
+test('admin can change an event slug to a free one', function () {
+    $event = Event::factory()->create(['title' => 'Original', 'slug' => 'original']);
+
+    Livewire::test(EventForm::class, ['event' => $event])
+        ->set('slug', 'moved-slug')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($event->fresh()->slug)->toBe('moved-slug');
+});
+
+test('clearing the slug field keeps the event on its current slug', function () {
+    $event = Event::factory()->create(['title' => 'Original', 'slug' => 'original']);
+
+    Livewire::test(EventForm::class, ['event' => $event])
+        ->set('slug', '')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($event->fresh()->slug)->toBe('original');
+});
+
 test('admin can update an existing event', function () {
     $event = Event::factory()->create(['title' => 'Original', 'slug' => 'original']);
 

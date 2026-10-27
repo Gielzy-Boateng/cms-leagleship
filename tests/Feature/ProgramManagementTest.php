@@ -35,6 +35,39 @@ test('program creation requires a title', function () {
         ->assertHasErrors(['title' => 'required']);
 });
 
+test('admin can set the program slug from the dashboard', function () {
+    Livewire::test(ProgramForm::class)
+        ->set('title', 'Scholarship Drive')
+        ->set('slug', 'Drive 2026')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Program::firstWhere('title', 'Scholarship Drive')->slug)->toBe('drive-2026');
+});
+
+test('a slug already used by another program is rejected', function () {
+    Program::factory()->create(['title' => 'Mentorship Circle', 'slug' => 'mentorship-circle']);
+
+    Livewire::test(ProgramForm::class)
+        ->set('title', 'New Circle')
+        ->set('slug', 'mentorship-circle')
+        ->call('save')
+        ->assertHasErrors(['slug']);
+
+    expect(Program::count())->toBe(1);
+});
+
+test('clearing the slug field keeps the program on its current slug', function () {
+    $program = Program::factory()->create(['title' => 'Original', 'slug' => 'original']);
+
+    Livewire::test(ProgramForm::class, ['program' => $program])
+        ->set('slug', '')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($program->fresh()->slug)->toBe('original');
+});
+
 test('admin can set a date and cover image on a program', function () {
     Storage::fake('public');
 

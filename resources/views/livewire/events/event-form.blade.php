@@ -12,6 +12,14 @@
         </div>
 
         <div class="sm:col-span-2">
+            <label for="slug" class="mb-1.5 block text-sm font-medium text-gray-700">Slug</label>
+            <p class="mb-1.5 text-xs text-gray-400">Lowercase letters, numbers and dashes. Leave blank to build it from the title. The website asks for this event at <code class="rounded bg-gray-100 px-1.5 py-0.5 text-gray-600">/api/events/{{ $slug ?: 'auto-generated-from-title' }}</code></p>
+            <input id="slug" type="text" wire:model="slug" placeholder="{{ $event?->slug ?? 'community-launch-meetup' }}"
+                   class="w-full rounded-lg border border-yellow-200 bg-yellow-50 px-3.5 py-2.5 font-mono text-sm text-navy-800 placeholder:text-gray-400 focus:border-gold-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-gold-500" />
+            @error('slug') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="sm:col-span-2">
             <label for="description" class="mb-1.5 block text-sm font-medium text-gray-700">Description</label>
             <textarea id="description" wire:model="description" rows="5"
                       class="w-full rounded-lg border border-yellow-200 bg-yellow-50 px-3.5 py-2.5 text-sm text-navy-800 placeholder:text-gray-400 focus:border-gold-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-gold-500"></textarea>

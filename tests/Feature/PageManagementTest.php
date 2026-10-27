@@ -33,6 +33,39 @@ test('admin can create a page from blocks', function () {
         ->and($page->blocks()[0])->toMatchArray(['type' => 'heading', 'text' => 'What changed this year', 'level' => 2]);
 });
 
+test('admin can set the page slug from the dashboard', function () {
+    Livewire::test(PageForm::class)
+        ->set('title', 'Impact')
+        ->set('slug', 'Impact Report 2026')
+        ->set('blocks', [
+            ['type' => 'heading', 'text' => 'What changed this year', 'level' => 2],
+        ])
+        ->set('status', PublicationStatus::Published->value)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $page = Page::firstWhere('title', 'Impact');
+
+    expect($page->slug)->toBe('impact-report-2026');
+
+    $this->getJson('/api/pages/impact-report-2026')->assertOk();
+});
+
+test('a slug already used by another page is rejected', function () {
+    Page::factory()->create(['title' => 'About', 'slug' => 'about']);
+
+    Livewire::test(PageForm::class)
+        ->set('title', 'About Us')
+        ->set('slug', 'about')
+        ->set('blocks', [
+            ['type' => 'heading', 'text' => 'Who we are', 'level' => 2],
+        ])
+        ->call('save')
+        ->assertHasErrors(['slug']);
+
+    expect(Page::count())->toBe(1);
+});
+
 test('saving a page drops empty blocks', function () {
     Livewire::test(PageForm::class)
         ->set('title', 'Trimmed page')
