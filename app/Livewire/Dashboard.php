@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Manifesto;
 use App\Models\Page;
 use App\Models\Program;
+use App\Models\Testimonial;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -26,10 +27,13 @@ class Dashboard extends Component
             'publishedManifestoCount' => Manifesto::query()->published()->count(),
             'pageCount' => Page::query()->count(),
             'publishedPageCount' => Page::query()->published()->count(),
+            'testimonialCount' => Testimonial::query()->count(),
+            'publishedTestimonialCount' => Testimonial::query()->published()->count(),
             'recentEvents' => Event::query()->latest()->limit(6)->get(),
             'recentPrograms' => Program::query()->latest()->limit(6)->get(),
             'recentManifestos' => Manifesto::query()->orderBy('sort_order')->latest()->limit(6)->get(),
             'recentPages' => Page::query()->latest('updated_at')->limit(6)->get(),
+            'recentTestimonials' => Testimonial::query()->orderBy('sort_order')->latest()->limit(6)->get(),
         ]);
     }
 }

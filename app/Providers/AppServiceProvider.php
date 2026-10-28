@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Manifesto;
 use App\Models\Page;
 use App\Models\Program;
+use App\Models\Testimonial;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
                     ['label' => 'Programs', 'route' => 'programs', 'active' => ['programs', 'programs.*'], 'icon' => 'megaphone', 'count' => Program::query()->count()],
                     ['label' => 'Manifestos', 'route' => 'manifestos', 'active' => ['manifestos', 'manifestos.*'], 'icon' => 'menu-book', 'count' => Manifesto::query()->count()],
                     ['label' => 'Pages', 'route' => 'pages', 'active' => ['pages', 'pages.*'], 'icon' => 'description', 'count' => Page::query()->count()],
+                    ['label' => 'Testimonials', 'route' => 'testimonials', 'active' => ['testimonials', 'testimonials.*'], 'icon' => 'format_quote', 'count' => Testimonial::query()->count()],
                 ],
                 'Site' => [
                     ['label' => 'Settings', 'route' => 'settings', 'active' => ['settings'], 'icon' => 'cog'],
@@ -56,6 +58,7 @@ class AppServiceProvider extends ServiceProvider
                     ['label' => '/api/programs', 'url' => url('/api/programs'), 'icon' => 'code-bracket'],
                     ['label' => '/api/manifestos', 'url' => url('/api/manifestos'), 'icon' => 'code-bracket'],
                     ['label' => '/api/pages', 'url' => url('/api/pages'), 'icon' => 'code-bracket'],
+                    ['label' => '/api/testimonials', 'url' => url('/api/testimonials'), 'icon' => 'code-bracket'],
                     ['label' => '/api/site', 'url' => url('/api/site'), 'icon' => 'code-bracket'],
                 ],
             ]);

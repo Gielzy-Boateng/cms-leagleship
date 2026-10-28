@@ -11,6 +11,8 @@ use App\Livewire\Pages\PageList;
 use App\Livewire\Programs\ProgramForm;
 use App\Livewire\Programs\ProgramList;
 use App\Livewire\Settings\SiteSettings;
+use App\Livewire\Testimonials\TestimonialForm;
+use App\Livewire\Testimonials\TestimonialList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -46,6 +48,10 @@ Route::middleware('auth')->group(function () {
     Route::get('pages', PageList::class)->name('pages');
     Route::get('pages/create', PageForm::class)->name('pages.create');
     Route::get('pages/{page}/edit', PageForm::class)->name('pages.edit');
+
+    Route::get('testimonials', TestimonialList::class)->name('testimonials');
+    Route::get('testimonials/create', TestimonialForm::class)->name('testimonials.create');
+    Route::get('testimonials/{testimonial}/edit', TestimonialForm::class)->name('testimonials.edit');
 
     Route::get('settings', SiteSettings::class)->name('settings');
 });
