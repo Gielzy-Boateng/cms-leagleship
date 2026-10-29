@@ -8,7 +8,6 @@ use App\Models\Manifesto;
 use App\Models\Page;
 use App\Models\Program;
 use App\Models\SiteSetting;
-use App\Models\Testimonial;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -160,17 +159,6 @@ class DatabaseSeeder extends Seeder
                     ['type' => 'paragraph', 'text' => 'They still open every cohort, and still sit in the back of the room for the closing review.'],
                     ['type' => 'quote', 'text' => 'Announcements are easy. Delivery is the part that counts.', 'attribution' => 'Promise over performance'],
                 ],
-            ],
-        );
-
-        Testimonial::query()->firstOrCreate(
-            ['name' => 'Sarah Cudzo'],
-            [
-                'quote' => "The Convergence was a meaningful and transformative experience. It helped me gain new knowledge, build confidence, and reflect on my personal and professional growth.\n\nIt has encouraged me to be more intentional about my work, self-care, boundaries, and contribution to my community. It also gave me a stronger sense of belonging and motivation.\n\nI learned from other people's experiences and left feeling more confident, inspired, and committed to continuous learning and making a positive impact.",
-                'role' => 'Undergraduate, University of Education, Winneba',
-                'source' => 'The Convergence',
-                'sort_order' => 1,
-                'status' => PublicationStatus::Published,
             ],
         );
 

@@ -18,7 +18,7 @@
         ['label' => 'Programs', 'total' => $programCount, 'published' => $publishedProgramCount, 'icon' => 'megaphone', 'route' => 'programs'],
         ['label' => 'Manifestos', 'total' => $manifestoCount, 'published' => $publishedManifestoCount, 'icon' => 'menu-book', 'route' => 'manifestos'],
         ['label' => 'Pages', 'total' => $pageCount, 'published' => $publishedPageCount, 'icon' => 'description', 'route' => 'pages'],
-        ['label' => 'Testimonials', 'total' => $testimonialCount, 'published' => $publishedTestimonialCount, 'icon' => 'format_quote', 'route' => 'testimonials'],
+        ['label' => 'Testimonials', 'total' => $testimonialCount, 'published' => $publishedTestimonialCount, 'icon' => 'image', 'route' => 'testimonials'],
     ] as $stat)
         <a href="{{ route($stat['route']) }}" wire:navigate
            class="group flex items-start gap-4 rounded-2xl border border-dashed border-yellow-300 bg-white p-5 shadow-sm transition hover:shadow-md">
@@ -44,8 +44,8 @@
             'date' => fn (mixed $item) => $item->created_at?->format('F j, Y'), 'blurb' => fn (mixed $item) => $item->excerpt],
         ['label' => 'Pages', 'items' => $recentPages, 'resource' => 'pages', 'icon' => 'description',
             'date' => fn (mixed $item) => $item->updated_at?->format('F j, Y'), 'blurb' => fn (mixed $item) => $item->summary()],
-        ['label' => 'Testimonials', 'items' => $recentTestimonials, 'resource' => 'testimonials', 'icon' => 'format_quote',
-            'date' => fn (mixed $item) => $item->created_at?->format('F j, Y'), 'blurb' => fn (mixed $item) => \Illuminate\Support\Str::limit($item->quote, 90)],
+        ['label' => 'Testimonials', 'items' => $recentTestimonials, 'resource' => 'testimonials', 'icon' => 'image',
+            'date' => fn (mixed $item) => $item->created_at?->format('F j, Y'), 'blurb' => fn (mixed $item) => null],
     ] as $section)
         <section>
             <div class="mb-3 flex items-center justify-between gap-3">

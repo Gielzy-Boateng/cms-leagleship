@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -20,30 +19,14 @@ class TestimonialList extends Component
     use SendsToasts;
     use WithPagination;
 
-    #[Url]
-    public string $search = '';
-
     /**
      * @return Builder<Testimonial>
      */
     protected function testimonialsQuery(): Builder
     {
         return Testimonial::query()
-            ->when($this->search, function (Builder $query): void {
-                $query->where(function (Builder $query): void {
-                    $query->where('quote', 'like', "%{$this->search}%")
-                        ->orWhere('name', 'like', "%{$this->search}%")
-                        ->orWhere('role', 'like', "%{$this->search}%")
-                        ->orWhere('source', 'like', "%{$this->search}%");
-                });
-            })
             ->orderBy('sort_order')
             ->orderBy('id');
-    }
-
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
     }
 
     public function toggleStatus(Testimonial $testimonial): void
@@ -55,8 +38,8 @@ class TestimonialList extends Component
         ]);
 
         $this->jsToast($testimonial->status === PublicationStatus::Published
-            ? "{$testimonial->name} published."
-            : "{$testimonial->name} moved to drafts.");
+            ? "{$testimonial->title} published."
+            : "{$testimonial->title} moved to drafts.");
     }
 
     public function move(Testimonial $testimonial, string $direction): void
@@ -85,11 +68,11 @@ class TestimonialList extends Component
 
     public function destroy(Testimonial $testimonial): void
     {
-        $name = $testimonial->name;
+        $label = $testimonial->title;
         $testimonial->purgeImage();
         $testimonial->delete();
 
-        $this->jsToast("{$name} deleted.");
+        $this->jsToast("{$label} deleted.");
     }
 
     public function render(): View

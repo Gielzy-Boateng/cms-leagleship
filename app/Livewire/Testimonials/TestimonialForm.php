@@ -22,39 +22,19 @@ class TestimonialForm extends Component
 
     public ?Testimonial $testimonial = null;
 
-    #[Validate(['required', 'string', 'max:5000'])]
-    public string $quote = '';
-
-    #[Validate(['required', 'string', 'max:255'])]
-    public string $name = '';
-
-    #[Validate(['nullable', 'string', 'max:255'])]
-    public string $role = '';
-
-    #[Validate(['nullable', 'string', 'max:255'])]
-    public string $source = '';
-
     #[Validate(['required', 'integer', 'min:0'])]
     public string $sortOrder = '0';
 
     #[Validate(['required', 'string'])]
     public string $status = PublicationStatus::Draft->value;
 
-    #[Validate(['nullable', 'image', 'max:4096', 'mimes:jpg,jpeg,png,webp'], as: 'portrait')]
     public ?TemporaryUploadedFile $imageUpload = null;
-
-    #[Validate(['nullable', 'boolean'])]
-    public bool $removeImage = false;
 
     public function mount(?Testimonial $testimonial = null): void
     {
         $this->testimonial = $testimonial;
 
         if ($testimonial) {
-            $this->quote = $testimonial->quote;
-            $this->name = $testimonial->name;
-            $this->role = $testimonial->role ?? '';
-            $this->source = $testimonial->source ?? '';
             $this->sortOrder = (string) $testimonial->sort_order;
             $this->status = $testimonial->status->value;
 
@@ -66,26 +46,27 @@ class TestimonialForm extends Component
 
     public function save(): void
     {
-        $this->validate();
+        $rules = [
+            'sortOrder' => ['required', 'integer', 'min:0'],
+            'status' => ['required', 'string'],
+            'imageUpload' => $this->testimonial
+                ? ['nullable', 'image', 'max:8192', 'mimes:jpg,jpeg,png,webp']
+                : ['required', 'image', 'max:8192', 'mimes:jpg,jpeg,png,webp'],
+        ];
+
+        $this->validate($rules);
 
         $data = [
-            'quote' => $this->quote,
-            'name' => $this->name,
-            'role' => $this->role ?: null,
-            'source' => $this->source ?: null,
             'sort_order' => (int) $this->sortOrder,
             'status' => PublicationStatus::from($this->status),
         ];
 
         if ($this->imageUpload) {
             $data['image'] = ImageOptimizer::store($this->imageUpload, 'testimonials');
-        } elseif ($this->removeImage) {
-            $this->deleteStoredImage();
-            $data['image'] = null;
-        }
 
-        if ($this->imageUpload && $this->testimonial?->image) {
-            $this->deleteStoredImage($this->testimonial->image);
+            if ($this->testimonial?->image) {
+                $this->deleteStoredImage($this->testimonial->image);
+            }
         }
 
         $testimonial = $this->testimonial

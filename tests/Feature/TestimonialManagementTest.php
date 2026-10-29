@@ -13,51 +13,50 @@ beforeEach(function () {
     $this->actingAs(User::factory()->create());
 });
 
-test('admin can create a testimonial from the dashboard', function () {
+test('admin can create a testimonial card from the dashboard', function () {
+    Storage::fake('public');
+
     Livewire::test(TestimonialForm::class)
-        ->set('quote', "The Convergence gave me a stronger sense of belonging.\n\nI left committed to making a positive impact.")
-        ->set('name', 'Sarah Cudzo')
-        ->set('role', 'Undergraduate, University of Education, Winneba')
-        ->set('source', 'The Convergence')
+        ->set('imageUpload', TemporaryUploadedFile::fake()->image('canva-card.png', 1080, 1350))
         ->set('status', PublicationStatus::Published->value)
         ->call('save')
         ->assertHasNoErrors();
 
-    $testimonial = Testimonial::firstWhere('name', 'Sarah Cudzo');
+    $testimonial = Testimonial::query()->first();
 
     expect($testimonial->status)->toBe(PublicationStatus::Published)
         ->and($testimonial->sort_order)->toBe(1)
-        ->and($testimonial->role)->toBe('Undergraduate, University of Education, Winneba')
-        ->and($testimonial->quote)->toContain('stronger sense of belonging');
+        ->and(Storage::disk('public')->exists($testimonial->image))->toBeTrue();
+
+    $this->getJson('/api/testimonials')
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.image', Storage::disk('public')->url($testimonial->image));
 });
 
-test('testimonial creation requires a quote and a name', function () {
+test('testimonial creation requires a card image', function () {
     Livewire::test(TestimonialForm::class)
-        ->set('quote', '')
-        ->set('name', '')
         ->call('save')
-        ->assertHasErrors(['quote' => 'required', 'name' => 'required']);
+        ->assertHasErrors(['imageUpload' => 'required']);
 
     expect(Testimonial::count())->toBe(0);
 });
 
-test('admin can attach a portrait to a testimonial', function () {
+test('admin can replace a card image', function () {
     Storage::fake('public');
 
-    Livewire::test(TestimonialForm::class)
-        ->set('quote', 'It helped me build confidence.')
-        ->set('name', 'Ama Boateng')
-        ->set('imageUpload', TemporaryUploadedFile::fake()->image('portrait.png'))
-        ->set('status', PublicationStatus::Published->value)
+    $testimonial = Testimonial::factory()->create(['image' => 'testimonials/old.webp']);
+    Storage::disk('public')->put('testimonials/old.webp', 'bytes');
+
+    Livewire::test(TestimonialForm::class, ['testimonial' => $testimonial])
+        ->set('imageUpload', TemporaryUploadedFile::fake()->image('new-card.jpg'))
         ->call('save')
         ->assertHasNoErrors();
 
-    $testimonial = Testimonial::firstWhere('name', 'Ama Boateng');
+    $testimonial->refresh();
 
-    expect(Storage::disk('public')->exists($testimonial->image))->toBeTrue();
-
-    $this->getJson('/api/testimonials')
-        ->assertJsonPath('data.0.image', Storage::disk('public')->url($testimonial->image));
+    expect($testimonial->image)->not->toBe('testimonials/old.webp')
+        ->and(Storage::disk('public')->exists($testimonial->image))->toBeTrue()
+        ->and(Storage::disk('public')->exists('testimonials/old.webp'))->toBeFalse();
 });
 
 test('admin can reorder testimonials', function () {
@@ -73,8 +72,8 @@ test('admin can reorder testimonials', function () {
 test('admin can toggle and delete a testimonial', function () {
     Storage::fake('public');
 
-    $testimonial = Testimonial::factory()->create(['image' => 'testimonials/portrait.webp']);
-    Storage::disk('public')->put('testimonials/portrait.webp', 'bytes');
+    $testimonial = Testimonial::factory()->create(['image' => 'testimonials/card.webp']);
+    Storage::disk('public')->put('testimonials/card.webp', 'bytes');
 
     Livewire::test(TestimonialList::class)->call('toggleStatus', $testimonial);
     expect($testimonial->fresh()->status)->toBe(PublicationStatus::Published);
@@ -82,15 +81,5 @@ test('admin can toggle and delete a testimonial', function () {
     Livewire::test(TestimonialList::class)->call('destroy', $testimonial);
 
     expect(Testimonial::count())->toBe(0)
-        ->and(Storage::disk('public')->exists('testimonials/portrait.webp'))->toBeFalse();
-});
-
-test('testimonials can be searched by the words they contain', function () {
-    Testimonial::factory()->create(['name' => 'Sarah Cudzo', 'quote' => 'A meaningful and transformative experience.']);
-    Testimonial::factory()->create(['name' => 'Other Person', 'quote' => 'Something else entirely.']);
-
-    Livewire::test(TestimonialList::class)
-        ->set('search', 'transformative')
-        ->assertSee('Sarah Cudzo')
-        ->assertDontSee('Other Person');
+        ->and(Storage::disk('public')->exists('testimonials/card.webp'))->toBeFalse();
 });

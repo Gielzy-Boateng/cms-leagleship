@@ -1,38 +1,30 @@
 <div>
 <x-page-header :title="$testimonial !== null ? 'Edit testimonial' : 'Create testimonial'"
-               :breadcrumbs="['Content' => null, 'Testimonials' => route('testimonials'), ($testimonial !== null ? $testimonial->name : 'Create') => null]" />
+               :breadcrumbs="['Content' => null, 'Testimonials' => route('testimonials'), ($testimonial !== null ? $testimonial->title : 'Create') => null]" />
 
 <form wire:submit="save" class="max-w-3xl space-y-6 rounded-2xl border border-dashed border-yellow-300 bg-white p-6 shadow-sm sm:p-8">
     <div class="grid gap-5 sm:grid-cols-2">
         <div class="sm:col-span-2">
-            <label for="quote" class="mb-1.5 block text-sm font-medium text-gray-700">Quote</label>
-            <p class="mb-1.5 text-xs text-gray-400">The words as they were given. Blank lines start a new paragraph on the website.</p>
-            <textarea id="quote" wire:model="quote" rows="7" required
-                      class="w-full rounded-lg border border-yellow-200 bg-yellow-50 px-3.5 py-2.5 text-sm text-navy-800 placeholder:text-gray-400 focus:border-gold-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-gold-500"></textarea>
-            @error('quote') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
-        </div>
-
-        <div>
-            <label for="name" class="mb-1.5 block text-sm font-medium text-gray-700">Name</label>
-            <input id="name" type="text" wire:model="name" required
-                   class="w-full rounded-lg border border-yellow-200 bg-yellow-50 px-3.5 py-2.5 text-sm text-navy-800 placeholder:text-gray-400 focus:border-gold-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-gold-500" />
-            @error('name') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
-        </div>
-
-        <div>
-            <label for="role" class="mb-1.5 block text-sm font-medium text-gray-700">Role (optional)</label>
-            <p class="mb-1.5 text-xs text-gray-400">Shown under the name, for example "Undergraduate, University of Education, Winneba".</p>
-            <input id="role" type="text" wire:model="role"
-                   class="w-full rounded-lg border border-yellow-200 bg-yellow-50 px-3.5 py-2.5 text-sm text-navy-800 placeholder:text-gray-400 focus:border-gold-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-gold-500" />
-            @error('role') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
-        </div>
-
-        <div>
-            <label for="source" class="mb-1.5 block text-sm font-medium text-gray-700">Programme or event (optional)</label>
-            <p class="mb-1.5 text-xs text-gray-400">Lets the website group quotes by what they are about.</p>
-            <input id="source" type="text" wire:model="source"
-                   class="w-full rounded-lg border border-yellow-200 bg-yellow-50 px-3.5 py-2.5 text-sm text-navy-800 placeholder:text-gray-400 focus:border-gold-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-gold-500" />
-            @error('source') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
+            <span class="mb-1.5 block text-sm font-medium text-gray-700">Card image</span>
+            <p class="mb-1.5 text-xs text-gray-400">Upload the finished Canva card. The website shows this image as-is in the carousel.</p>
+            @if ($imageUpload?->isPreviewable())
+                <div class="relative max-w-sm">
+                    <img src="{{ $imageUpload->temporaryUrl() }}" alt="Card preview" class="w-full rounded-xl object-cover ring-1 ring-yellow-200" />
+                    <button type="button" wire:click="$set('imageUpload', null)"
+                            class="absolute right-2 top-2 rounded-lg bg-navy-900/70 px-2.5 py-1 text-xs font-medium text-white hover:bg-navy-900">Replace</button>
+                </div>
+            @elseif ($testimonial !== null && $testimonial->image)
+                <div class="max-w-sm">
+                    <img src="{{ $testimonial->imageUrl() }}" alt="{{ $testimonial->title }}" class="w-full rounded-xl object-cover ring-1 ring-yellow-200" />
+                    <p class="mt-2 text-xs text-gray-400">Upload a new file below to replace this card.</p>
+                    <div class="mt-3">
+                        <x-image-upload model="imageUpload" />
+                    </div>
+                </div>
+            @else
+                <x-image-upload model="imageUpload" />
+            @endif
+            @error('imageUpload') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
         </div>
 
         <div>
@@ -51,29 +43,6 @@
                 @endforeach
             </select>
             @error('status') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
-        </div>
-
-        <div class="sm:col-span-2">
-            <span class="mb-1.5 block text-sm font-medium text-gray-700">Portrait (optional)</span>
-            <p class="mb-1.5 text-xs text-gray-400">Shown as the round photo beside the quote. Only publish a portrait the person has agreed to.</p>
-            @if ($imageUpload?->isPreviewable())
-                <div class="relative w-40">
-                    <img src="{{ $imageUpload->temporaryUrl() }}" alt="Portrait preview" class="h-40 w-40 rounded-full object-cover ring-1 ring-yellow-200" />
-                    <button type="button" wire:click="$set('imageUpload', null)"
-                            class="absolute right-2 top-2 rounded-lg bg-navy-900/70 px-2.5 py-1 text-xs font-medium text-white hover:bg-navy-900">Replace</button>
-                </div>
-            @elseif ($testimonial !== null && $testimonial->image && ! $removeImage)
-                <div class="w-40">
-                    <img src="{{ $testimonial->imageUrl() }}" alt="{{ $testimonial->name }} portrait" class="h-40 w-40 rounded-full object-cover ring-1 ring-yellow-200" />
-                    <label class="mt-2 flex items-center gap-2 text-sm text-gray-500">
-                        <input type="checkbox" wire:model="removeImage" class="rounded border-yellow-300" />
-                        Remove current photo
-                    </label>
-                </div>
-            @else
-                <x-image-upload model="imageUpload" />
-            @endif
-            @error('imageUpload') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
         </div>
     </div>
 

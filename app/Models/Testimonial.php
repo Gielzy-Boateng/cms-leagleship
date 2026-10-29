@@ -15,18 +15,14 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
- * @property string $quote
- * @property string $name
- * @property string|null $role
- * @property string|null $source
- * @property string|null $image
+ * @property string $image
  * @property int $sort_order
  * @property PublicationStatus $status
  * @property-read string $title
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['quote', 'name', 'role', 'source', 'image', 'sort_order', 'status'])]
+#[Fillable(['image', 'sort_order', 'status'])]
 class Testimonial extends Model
 {
     /** @use HasFactory<TestimonialFactory> */
@@ -50,17 +46,17 @@ class Testimonial extends Model
     }
 
     /**
-     * The author, so the shared resource row can label the record.
+     * Label for admin lists — the card itself is the image.
      *
-     * @return Attribute<string, never>
+     * @return Attribute<non-falsy-string, never>
      */
     protected function title(): Attribute
     {
-        return Attribute::get(fn (): string => $this->name);
+        return Attribute::get(fn (): string => 'Card #'.$this->sort_order);
     }
 
     /**
-     * Absolute URL of the portrait, or null when none is set.
+     * Absolute URL of the Canva card image.
      */
     public function imageUrl(): ?string
     {
@@ -83,10 +79,6 @@ class Testimonial extends Model
     {
         return [
             'id' => $this->id,
-            'quote' => $this->quote,
-            'name' => $this->name,
-            'role' => $this->role,
-            'source' => $this->source,
             'image' => $this->imageUrl(),
             'sort_order' => $this->sort_order,
             'created_at' => $this->created_at?->toIso8601String(),

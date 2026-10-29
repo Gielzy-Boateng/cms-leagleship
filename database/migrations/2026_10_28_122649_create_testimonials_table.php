@@ -13,11 +13,7 @@ return new class extends Migration
     {
         Schema::create('testimonials', function (Blueprint $table) {
             $table->id();
-            $table->text('quote');
-            $table->string('name');
-            $table->string('role')->nullable();
-            $table->string('source')->nullable();
-            $table->string('image')->nullable();
+            $table->string('image');
             $table->unsignedInteger('sort_order')->default(0)->index();
             $table->string('status')->default('draft')->index();
             $table->timestamps();

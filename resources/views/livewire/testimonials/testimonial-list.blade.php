@@ -8,30 +8,19 @@
     </x-slot:actions>
 </x-page-header>
 
-<div class="mb-4 max-w-md">
-    <div class="relative">
-        <x-icon name="search" class="pointer-events-none absolute left-3 top-1/2 text-[16px]! -translate-y-1/2 text-gray-400" />
-        <input type="search" wire:model.live.debounce.300ms="search" placeholder="Search testimonials…"
-               class="w-full rounded-lg border border-yellow-200 bg-white py-2 pl-9 pr-9 text-sm shadow-sm placeholder:text-gray-400 focus:border-gold-500 focus:outline-none focus:ring-1 focus:ring-gold-500" />
-        <x-icon name="progress_activity" wire:loading wire:target="search" style="display: none"
-                class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[16px]! animate-spin text-gold-600" />
-    </div>
-</div>
-
 @if ($testimonials->isEmpty())
     <p class="rounded-2xl border border-dashed border-yellow-300 bg-white px-5 py-10 text-center text-sm text-gray-400">
-        No testimonials found. <a href="{{ route('testimonials.create') }}" class="font-medium text-gold-600 hover:underline">Create one</a>.
+        No testimonials found. <a href="{{ route('testimonials.create') }}" class="font-medium text-gold-600 hover:underline">Upload a Canva card</a>.
     </p>
 @else
-    <x-resource-table :columns="['Order', 'Role', 'Added']">
+    <x-resource-table :columns="['Order', 'Added']">
         @foreach ($testimonials as $testimonial)
             <x-resource-row
                 wire:key="testimonial-{{ $testimonial->id }}"
                 :item="$testimonial"
                 :href="route('testimonials.edit', $testimonial)"
-                icon="format_quote"
-                :cells="['#'.$testimonial->sort_order, $testimonial->role, $testimonial->created_at?->format('F j, Y')]"
-                :blurb="\Illuminate\Support\Str::limit($testimonial->quote, 120)"
+                icon="image"
+                :cells="['#'.$testimonial->sort_order, $testimonial->created_at?->format('F j, Y')]"
             >
                 <x-slot:actions>
                     <button wire:click="move({{ $testimonial->id }}, 'up')" title="Move up"

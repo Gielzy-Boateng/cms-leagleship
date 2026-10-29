@@ -19,10 +19,7 @@ class TestimonialFactory extends Factory
     public function definition(): array
     {
         return [
-            'quote' => fake()->paragraph(4),
-            'name' => fake()->name(),
-            'role' => fake()->jobTitle(),
-            'source' => fake()->randomElement(['The Convergence', 'Mentorship circle', 'Volunteer training']),
+            'image' => 'testimonials/'.fake()->uuid().'.webp',
             'sort_order' => fake()->numberBetween(0, 50),
             'status' => PublicationStatus::Draft,
         ];
