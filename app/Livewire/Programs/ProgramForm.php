@@ -24,7 +24,7 @@ class ProgramForm extends Component
 
     public ?Program $program = null;
 
-    #[Validate(['nullable', 'image', 'max:4096', 'mimes:jpg,jpeg,png,webp'], as: 'cover image')]
+    #[Validate(['nullable', 'image', 'max:8192', 'mimes:jpg,jpeg,png,webp'], as: 'cover image')]
     public ?TemporaryUploadedFile $imageUpload = null;
 
     #[Validate(['nullable', 'boolean'])]
@@ -121,7 +121,7 @@ class ProgramForm extends Component
             'link' => ['nullable', 'string', 'max:255', 'url'],
             'status' => ['required', 'string'],
             'isFeatured' => ['boolean'],
-            'imageUpload' => ['nullable', 'image', 'max:4096', 'mimes:jpg,jpeg,png,webp'],
+            'imageUpload' => ['nullable', 'image', 'max:8192', 'mimes:jpg,jpeg,png,webp'],
             'removeImage' => ['nullable', 'boolean'],
         ]);
 
@@ -155,7 +155,14 @@ class ProgramForm extends Component
         }
 
         if ($this->imageUpload) {
-            $data['image'] = ImageOptimizer::store($this->imageUpload, 'programs');
+            try {
+                $data['image'] = ImageOptimizer::store($this->imageUpload, 'programs');
+            } catch (\Throwable $exception) {
+                report($exception);
+                $this->addError('imageUpload', 'Could not store that cover image. Try a smaller JPG/PNG/WebP under 8 MB.');
+
+                return;
+            }
         } elseif ($this->removeImage) {
             $this->deleteStoredImage();
             $data['image'] = null;

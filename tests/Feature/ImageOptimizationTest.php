@@ -12,7 +12,7 @@ beforeEach(function () {
     Storage::fake('public');
 });
 
-test('an oversized upload is shrunk to the max edge and stored as webp', function () {
+test('uploads are stored as-is without server-side re-encoding', function () {
     Livewire::test(EventForm::class)
         ->set('title', 'Rally')
         ->set('imageUpload', TemporaryUploadedFile::fake()->image('huge.jpg', 3000, 2000))
@@ -22,13 +22,13 @@ test('an oversized upload is shrunk to the max edge and stored as webp', functio
     $image = Event::firstWhere('title', 'Rally')->image;
     $path = Storage::disk('public')->path($image);
 
-    expect($image)->toEndWith('.webp')
-        ->and(exif_imagetype($path))->toBe(IMAGETYPE_WEBP)
-        ->and(getimagesize($path)[0])->toBe(1920)
-        ->and(getimagesize($path)[1])->toBe(1280);
+    expect($image)->toEndWith('.jpg')
+        ->and(exif_imagetype($path))->toBe(IMAGETYPE_JPEG)
+        ->and(getimagesize($path)[0])->toBe(3000)
+        ->and(getimagesize($path)[1])->toBe(2000);
 });
 
-test('a portrait upload keeps its aspect ratio when shrunk', function () {
+test('portrait uploads keep their original dimensions', function () {
     Livewire::test(EventForm::class)
         ->set('title', 'Portrait')
         ->set('imageUpload', TemporaryUploadedFile::fake()->image('tall.png', 2000, 3000))
@@ -37,11 +37,11 @@ test('a portrait upload keeps its aspect ratio when shrunk', function () {
 
     $path = Storage::disk('public')->path(Event::firstWhere('title', 'Portrait')->image);
 
-    expect(getimagesize($path)[0])->toBe(1280)
-        ->and(getimagesize($path)[1])->toBe(1920);
+    expect(getimagesize($path)[0])->toBe(2000)
+        ->and(getimagesize($path)[1])->toBe(3000);
 });
 
-test('a small upload keeps its dimensions but is still re-encoded', function () {
+test('a small upload is stored without being rewritten', function () {
     Livewire::test(EventForm::class)
         ->set('title', 'Small')
         ->set('imageUpload', TemporaryUploadedFile::fake()->image('thumb.jpg', 320, 240))
@@ -51,8 +51,7 @@ test('a small upload keeps its dimensions but is still re-encoded', function () 
     $image = Event::firstWhere('title', 'Small')->image;
     $path = Storage::disk('public')->path($image);
 
-    expect($image)->toEndWith('.webp')
+    expect($image)->toEndWith('.jpg')
         ->and(getimagesize($path)[0])->toBe(320)
-        ->and(getimagesize($path)[1])->toBe(240)
-        ->and(filesize($path))->toBeLessThan(200_000);
+        ->and(getimagesize($path)[1])->toBe(240);
 });

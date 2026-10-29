@@ -61,7 +61,7 @@ class TestimonialController extends Controller
             ?? PublicationStatus::Published;
 
         $testimonial = Testimonial::create([
-            'image' => ImageOptimizer::storeOriginal($request->file('image'), 'testimonials'),
+            'image' => ImageOptimizer::store($request->file('image'), 'testimonials'),
             'sort_order' => $validated['sort_order'] ?? ((int) Testimonial::query()->max('sort_order') + 1),
             'status' => $status,
         ]);

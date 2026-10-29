@@ -63,9 +63,7 @@ class TestimonialForm extends Component
 
         if ($this->imageUpload) {
             try {
-                // Canva cards are finished assets — store as uploaded. Re-encoding
-                // large PNGs with GD often fatals shared-hosting memory limits.
-                $data['image'] = ImageOptimizer::storeOriginal($this->imageUpload, 'testimonials');
+                $data['image'] = ImageOptimizer::store($this->imageUpload, 'testimonials');
             } catch (\Throwable $exception) {
                 report($exception);
                 $this->addError('imageUpload', 'Could not store that card image. Try a smaller JPG/PNG/WebP under 8 MB.');

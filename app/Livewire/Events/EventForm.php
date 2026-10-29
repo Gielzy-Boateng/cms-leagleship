@@ -24,7 +24,7 @@ class EventForm extends Component
 
     public ?Event $event = null;
 
-    #[Validate(['nullable', 'image', 'max:4096', 'mimes:jpg,jpeg,png,webp'], as: 'cover image')]
+    #[Validate(['nullable', 'image', 'max:8192', 'mimes:jpg,jpeg,png,webp'], as: 'cover image')]
     public ?TemporaryUploadedFile $imageUpload = null;
 
     #[Validate(['nullable', 'boolean'])]
@@ -92,7 +92,14 @@ class EventForm extends Component
         }
 
         if ($this->imageUpload) {
-            $data['image'] = ImageOptimizer::store($this->imageUpload, 'events');
+            try {
+                $data['image'] = ImageOptimizer::store($this->imageUpload, 'events');
+            } catch (\Throwable $exception) {
+                report($exception);
+                $this->addError('imageUpload', 'Could not store that cover image. Try a smaller JPG/PNG/WebP under 8 MB.');
+
+                return;
+            }
         } elseif ($this->removeImage) {
             $this->deleteStoredImage();
             $data['image'] = null;

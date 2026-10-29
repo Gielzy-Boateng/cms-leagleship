@@ -100,12 +100,17 @@ class PageForm extends Component
         }
 
         $this->validate(array_merge(PageBlocks::rules(), [
-            'imageUploads.*' => ['nullable', 'image', 'max:4096', 'mimes:jpg,jpeg,png,webp'],
+            'imageUploads.*' => ['nullable', 'image', 'max:8192', 'mimes:jpg,jpeg,png,webp'],
         ]));
 
         $previousImages = $this->page?->imagePaths() ?? [];
 
         $blocks = $this->storeImages();
+
+        if ($blocks === null) {
+            return;
+        }
+
         $normalized = PageBlocks::normalize($blocks);
 
         if ($normalized === []) {
@@ -148,9 +153,9 @@ class PageForm extends Component
     /**
      * Persist pending uploads; the images the page no longer references are pruned on save.
      *
-     * @return array<int, array<string, mixed>>
+     * @return array<int, array<string, mixed>>|null
      */
-    protected function storeImages(): array
+    protected function storeImages(): ?array
     {
         $blocks = $this->blocks;
 
@@ -165,7 +170,14 @@ class PageForm extends Component
                 continue;
             }
 
-            $blocks[$index]['src'] = ImageOptimizer::store($upload, 'pages');
+            try {
+                $blocks[$index]['src'] = ImageOptimizer::store($upload, 'pages');
+            } catch (\Throwable $exception) {
+                report($exception);
+                $this->addError('imageUploads.'.$block['id'], 'Could not store that image. Try a smaller JPG/PNG/WebP under 8 MB.');
+
+                return null;
+            }
         }
 
         return $blocks;

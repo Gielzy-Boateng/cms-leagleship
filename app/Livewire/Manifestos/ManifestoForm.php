@@ -42,7 +42,7 @@ class ManifestoForm extends Component
     #[Validate(['required', 'string'])]
     public string $status = PublicationStatus::Draft->value;
 
-    #[Validate(['nullable', 'image', 'max:4096', 'mimes:jpg,jpeg,png,webp'], as: 'image')]
+    #[Validate(['nullable', 'image', 'max:8192', 'mimes:jpg,jpeg,png,webp'], as: 'image')]
     public ?TemporaryUploadedFile $imageUpload = null;
 
     #[Validate(['nullable', 'boolean'])]
@@ -99,7 +99,14 @@ class ManifestoForm extends Component
         }
 
         if ($this->imageUpload) {
-            $data['image'] = ImageOptimizer::store($this->imageUpload, 'manifestos');
+            try {
+                $data['image'] = ImageOptimizer::store($this->imageUpload, 'manifestos');
+            } catch (\Throwable $exception) {
+                report($exception);
+                $this->addError('imageUpload', 'Could not store that image. Try a smaller JPG/PNG/WebP under 8 MB.');
+
+                return;
+            }
         } elseif ($this->removeImage) {
             $this->deleteStoredImage();
             $data['image'] = null;
