@@ -37,6 +37,16 @@ final class ImageOptimizer
         return $path;
     }
 
+    /**
+     * Store the upload as-is. Used for finished Canva cards where re-encoding
+     * only risks memory fatals on shared hosting.
+     */
+    public static function storeOriginal(UploadedFile $file, string $directory): string
+    {
+        return $file->store($directory, 'public')
+            ?: throw new RuntimeException('Unable to store the uploaded image.');
+    }
+
     private static function encode(UploadedFile $file): ?string
     {
         $source = $file->getRealPath();
