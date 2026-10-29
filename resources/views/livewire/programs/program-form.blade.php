@@ -26,6 +26,52 @@
             @error('description') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
         </div>
 
+        <div class="sm:col-span-2">
+            <span class="mb-1.5 block text-sm font-medium text-gray-700">Tags</span>
+            <p class="mb-1.5 text-xs text-gray-400">Shown under the description on the website, for example Courage · Vision · Stewardship. Press Enter or Add after each tag.</p>
+
+            @if ($tags !== [])
+                <div class="mb-3 flex flex-wrap gap-2">
+                    @foreach ($tags as $index => $tag)
+                        <span wire:key="tag-{{ $index }}-{{ $tag }}"
+                              class="inline-flex items-center gap-1.5 rounded-full bg-gold-100 px-3 py-1 text-sm font-medium text-gold-800 ring-1 ring-gold-200">
+                            {{ $tag }}
+                            <button type="button" wire:click="removeTag({{ $index }})"
+                                    class="rounded-full p-0.5 text-gold-600 transition hover:bg-gold-200 hover:text-navy-900"
+                                    title="Remove {{ $tag }}">
+                                <x-icon name="close" class="text-[14px]!" />
+                            </button>
+                        </span>
+                    @endforeach
+                </div>
+            @endif
+
+            <div class="flex flex-col gap-2 sm:flex-row">
+                <input id="tag_input" type="text" wire:model="tagInput" maxlength="40"
+                       wire:keydown.enter.prevent="addTag"
+                       placeholder="e.g. Courage"
+                       class="w-full rounded-lg border border-yellow-200 bg-yellow-50 px-3.5 py-2.5 text-sm text-navy-800 placeholder:text-gray-400 focus:border-gold-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-gold-500" />
+                <button type="button" wire:click="addTag"
+                        class="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-navy-800 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-navy-700">
+                    <x-icon name="plus" class="text-[16px]" /> Add tag
+                </button>
+            </div>
+            @error('tagInput') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
+            @error('tags') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
+            @error('tags.*') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
+
+            <div class="mt-3 flex flex-wrap gap-2">
+                @foreach (['Courage', 'Vision', 'Stewardship', 'Excellence', 'Innovation', 'Identity'] as $suggestion)
+                    @if (! collect($tags)->contains(fn (string $existing): bool => mb_strtolower($existing) === mb_strtolower($suggestion)))
+                        <button type="button" wire:click="addTag('{{ $suggestion }}')"
+                                class="rounded-full bg-yellow-50 px-3 py-1 text-xs font-medium text-gray-600 ring-1 ring-yellow-200 transition hover:bg-gold-100 hover:text-gold-800">
+                            + {{ $suggestion }}
+                        </button>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+
         <div>
             <label for="starts_at" class="mb-1.5 block text-sm font-medium text-gray-700">Date</label>
             <input id="starts_at" type="date" wire:model="startsAt"
@@ -42,6 +88,18 @@
                 @endforeach
             </select>
             @error('status') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="sm:col-span-2 rounded-xl border border-dashed border-yellow-300 bg-yellow-50/60 px-4 py-3">
+            <label class="flex items-start gap-3">
+                <input type="checkbox" wire:model="isFeatured"
+                       class="mt-1 rounded border-yellow-300 text-gold-500 focus:ring-gold-500" />
+                <span>
+                    <span class="block text-sm font-medium text-gray-700">Featured program</span>
+                    <span class="mt-0.5 block text-xs text-gray-400">Show this program in the large Featured Programs section at the top of the Programs page.</span>
+                </span>
+            </label>
+            @error('isFeatured') <span class="mt-1 block text-sm text-red-600">{{ $message }}</span> @enderror
         </div>
 
         <div class="sm:col-span-2">

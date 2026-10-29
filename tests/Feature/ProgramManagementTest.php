@@ -68,6 +68,65 @@ test('clearing the slug field keeps the program on its current slug', function (
     expect($program->fresh()->slug)->toBe('original');
 });
 
+test('admin can mark a program as featured', function () {
+    Livewire::test(ProgramForm::class)
+        ->set('title', 'Vision2535 Convergence (Cohort 1)')
+        ->set('status', PublicationStatus::Published->value)
+        ->set('isFeatured', true)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $program = Program::firstWhere('title', 'Vision2535 Convergence (Cohort 1)');
+
+    expect($program->is_featured)->toBeTrue();
+
+    $this->getJson('/api/programs?featured=1')
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.is_featured', true);
+});
+
+test('admin can add multiple tags to a program', function () {
+    Livewire::test(ProgramForm::class)
+        ->set('title', 'Vision2535 Convergence (Cohort 2)')
+        ->set('status', PublicationStatus::Published->value)
+        ->call('addTag', 'Courage')
+        ->call('addTag', 'Vision')
+        ->set('tagInput', 'Stewardship')
+        ->call('addTag')
+        ->call('addTag', 'Excellence')
+        ->call('addTag', 'Innovation')
+        ->call('addTag', 'Identity')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $program = Program::firstWhere('title', 'Vision2535 Convergence (Cohort 2)');
+
+    expect($program->tags)->toBe([
+        'Courage',
+        'Vision',
+        'Stewardship',
+        'Excellence',
+        'Innovation',
+        'Identity',
+    ]);
+
+    $this->getJson('/api/programs')
+        ->assertJsonPath('data.0.tags.0', 'Courage')
+        ->assertJsonPath('data.0.tags.5', 'Identity');
+});
+
+test('duplicate tags are ignored when adding to a program', function () {
+    Livewire::test(ProgramForm::class)
+        ->set('title', 'Tagged Program')
+        ->call('addTag', 'Courage')
+        ->call('addTag', 'courage')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(Program::firstWhere('title', 'Tagged Program')->tags)->toBe(['Courage']);
+});
+
 test('admin can set a date and cover image on a program', function () {
     Storage::fake('public');
 

@@ -54,6 +54,7 @@ class DatabaseSeeder extends Seeder
             [
                 'title' => 'Youth Mentorship Program',
                 'description' => 'One-year mentorship pairing young people with experienced professionals.',
+                'tags' => ['Courage', 'Vision', 'Stewardship', 'Excellence', 'Innovation', 'Identity'],
                 'link' => 'https://example.com/mentorship',
                 'status' => PublicationStatus::Published,
             ],

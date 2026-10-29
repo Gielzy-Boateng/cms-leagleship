@@ -40,6 +40,11 @@ final class ImageOptimizer
     private static function encode(UploadedFile $file): ?string
     {
         $source = $file->getRealPath();
+
+        if ($source === false || $source === '' || ! is_readable($source)) {
+            return null;
+        }
+
         $size = @getimagesize($source);
 
         if ($size === false || $size[0] * $size[1] > self::MAX_PIXELS) {

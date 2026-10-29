@@ -5,16 +5,19 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Program;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ProgramController extends Controller
 {
     /**
-     * Published programs.
+     * Published programs. Pass featured=1 for the Featured Programs section.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $programs = Program::query()
             ->published()
+            ->when($request->boolean('featured'), fn ($query) => $query->featured())
+            ->orderByDesc('is_featured')
             ->orderBy('title')
             ->get();
 

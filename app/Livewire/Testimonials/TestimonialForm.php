@@ -62,16 +62,30 @@ class TestimonialForm extends Component
         ];
 
         if ($this->imageUpload) {
-            $data['image'] = ImageOptimizer::store($this->imageUpload, 'testimonials');
+            try {
+                $data['image'] = ImageOptimizer::store($this->imageUpload, 'testimonials');
+            } catch (\Throwable $exception) {
+                report($exception);
+                $this->addError('imageUpload', 'Could not store that card image. Try a smaller JPG/PNG/WebP under 8 MB.');
+
+                return;
+            }
 
             if ($this->testimonial?->image) {
                 $this->deleteStoredImage($this->testimonial->image);
             }
         }
 
-        $testimonial = $this->testimonial
-            ? tap($this->testimonial)->update($data)
-            : Testimonial::create($data);
+        try {
+            $testimonial = $this->testimonial
+                ? tap($this->testimonial)->update($data)
+                : Testimonial::create($data);
+        } catch (\Throwable $exception) {
+            report($exception);
+            $this->addError('imageUpload', 'Could not save this testimonial. Ask the developer to check storage/logs/laravel.log.');
+
+            return;
+        }
 
         session()->flash('status', $this->testimonial ? 'Testimonial updated.' : 'Testimonial created.');
         $this->redirectRoute('testimonials.edit', $testimonial, navigate: true);

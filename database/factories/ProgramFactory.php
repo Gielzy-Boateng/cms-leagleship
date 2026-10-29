@@ -25,8 +25,13 @@ class ProgramFactory extends Factory
             'title' => $title,
             'slug' => Str::slug($title).'-'.fake()->unique()->numberBetween(1, 99999),
             'description' => fake()->paragraph(),
+            'tags' => ($picked = fake()->randomElements(
+                ['Courage', 'Vision', 'Stewardship', 'Excellence', 'Innovation', 'Identity'],
+                fake()->numberBetween(0, 3),
+            )) === [] ? null : $picked,
             'link' => fake()->url(),
             'status' => PublicationStatus::Draft,
+            'is_featured' => false,
         ];
     }
 
@@ -37,6 +42,16 @@ class ProgramFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => PublicationStatus::Published,
+        ]);
+    }
+
+    /**
+     * Indicate that the program appears in Featured Programs.
+     */
+    public function featured(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_featured' => true,
         ]);
     }
 }

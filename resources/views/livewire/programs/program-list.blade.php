@@ -23,14 +23,14 @@
         No programs found. <a href="{{ route('programs.create') }}" class="font-medium text-gold-600 hover:underline">Create one</a>.
     </p>
 @else
-    <x-resource-table :columns="['Runs from']">
+    <x-resource-table :columns="['Runs from', 'Featured']">
         @foreach ($programs as $program)
             <x-resource-row
                 wire:key="program-{{ $program->id }}"
                 :item="$program"
                 :href="route('programs.edit', $program)"
                 icon="megaphone"
-                :cells="[$program->starts_at?->format('F j, Y')]"
+                :cells="[$program->starts_at?->format('F j, Y'), $program->is_featured ? 'Yes' : '—']"
                 :blurb="$program->description"
             >
                 <x-slot:actions>

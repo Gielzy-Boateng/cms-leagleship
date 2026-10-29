@@ -42,11 +42,18 @@ class ProgramForm extends Component
     #[Validate(['nullable', 'string'])]
     public string $description = '';
 
+    /** @var list<string> */
+    public array $tags = [];
+
+    public string $tagInput = '';
+
     #[Validate(['nullable', 'string', 'max:255', 'url'])]
     public string $link = '';
 
     #[Validate(['required', 'string'])]
     public string $status = PublicationStatus::Draft->value;
+
+    public bool $isFeatured = false;
 
     public function mount(?Program $program = null): void
     {
@@ -56,15 +63,67 @@ class ProgramForm extends Component
             $this->title = $program->title;
             $this->slug = $program->slug;
             $this->description = $program->description ?? '';
+            $this->tags = $program->tags ?? [];
             $this->startsAt = $program->starts_at?->format('Y-m-d') ?? '';
             $this->link = $program->link ?? '';
             $this->status = $program->status->value;
+            $this->isFeatured = $program->is_featured;
         }
+    }
+
+    public function addTag(?string $value = null): void
+    {
+        $tag = trim($value ?? $this->tagInput);
+
+        if ($tag === '') {
+            return;
+        }
+
+        if (mb_strlen($tag) > 40) {
+            $this->addError('tagInput', 'Each tag may be at most 40 characters.');
+
+            return;
+        }
+
+        $exists = collect($this->tags)
+            ->contains(fn (string $existing): bool => mb_strtolower($existing) === mb_strtolower($tag));
+
+        if (! $exists) {
+            $this->tags[] = $tag;
+        }
+
+        $this->tagInput = '';
+        $this->resetErrorBag('tagInput');
+    }
+
+    public function removeTag(int $index): void
+    {
+        if (! array_key_exists($index, $this->tags)) {
+            return;
+        }
+
+        array_splice($this->tags, $index, 1);
     }
 
     public function save(): void
     {
-        $this->validate();
+        if (trim($this->tagInput) !== '') {
+            $this->addTag();
+        }
+
+        $this->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'tags' => ['array', 'max:20'],
+            'tags.*' => ['string', 'max:40'],
+            'startsAt' => ['nullable', 'date'],
+            'link' => ['nullable', 'string', 'max:255', 'url'],
+            'status' => ['required', 'string'],
+            'isFeatured' => ['boolean'],
+            'imageUpload' => ['nullable', 'image', 'max:4096', 'mimes:jpg,jpeg,png,webp'],
+            'removeImage' => ['nullable', 'boolean'],
+        ]);
 
         $slug = Str::slug($this->slug);
 
@@ -74,12 +133,21 @@ class ProgramForm extends Component
             return;
         }
 
+        $tags = collect($this->tags)
+            ->map(fn (string $tag): string => trim($tag))
+            ->filter()
+            ->unique(fn (string $tag): string => mb_strtolower($tag))
+            ->values()
+            ->all();
+
         $data = [
             'title' => $this->title,
             'description' => $this->description ?: null,
+            'tags' => $tags === [] ? null : $tags,
             'starts_at' => $this->startsAt ? Carbon::parse($this->startsAt)->startOfDay() : null,
             'link' => $this->link ?: null,
             'status' => PublicationStatus::from($this->status),
+            'is_featured' => $this->isFeatured,
         ];
 
         if ($slug !== '') {

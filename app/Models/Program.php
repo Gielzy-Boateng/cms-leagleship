@@ -18,14 +18,16 @@ use Illuminate\Support\Str;
  * @property string $title
  * @property string $slug
  * @property string|null $description
+ * @property list<string>|null $tags
  * @property Carbon|null $starts_at
  * @property string|null $image
  * @property string|null $link
  * @property PublicationStatus $status
+ * @property bool $is_featured
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['title', 'slug', 'description', 'starts_at', 'image', 'link', 'status'])]
+#[Fillable(['title', 'slug', 'description', 'tags', 'starts_at', 'image', 'link', 'status', 'is_featured'])]
 class Program extends Model
 {
     /** @use HasFactory<ProgramFactory> */
@@ -34,8 +36,10 @@ class Program extends Model
     protected function casts(): array
     {
         return [
+            'tags' => 'array',
             'starts_at' => 'date',
             'status' => PublicationStatus::class,
+            'is_featured' => 'boolean',
         ];
     }
 
@@ -46,6 +50,15 @@ class Program extends Model
     protected function published(Builder $query): void
     {
         $query->where('status', PublicationStatus::Published);
+    }
+
+    /**
+     * @param  Builder<static>  $query
+     */
+    #[Scope]
+    protected function featured(Builder $query): void
+    {
+        $query->where('is_featured', true);
     }
 
     protected static function booted(): void
@@ -101,9 +114,11 @@ class Program extends Model
             'title' => $this->title,
             'slug' => $this->slug,
             'description' => $this->description,
+            'tags' => $this->tags ?? [],
             'starts_at' => $this->starts_at?->toDateString(),
             'image' => $this->imageUrl(),
             'link' => $this->link,
+            'is_featured' => $this->is_featured,
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }
