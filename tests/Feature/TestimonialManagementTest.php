@@ -17,7 +17,7 @@ test('admin can create a testimonial card from the dashboard', function () {
     Storage::fake('public');
 
     Livewire::test(TestimonialForm::class)
-        ->set('imageUpload', TemporaryUploadedFile::fake()->image('canva-card.png', 1080, 1350))
+        ->set('imageUploads', [TemporaryUploadedFile::fake()->image('canva-card.png', 1080, 1350)])
         ->set('status', PublicationStatus::Published->value)
         ->call('save')
         ->assertHasNoErrors();
@@ -33,10 +33,33 @@ test('admin can create a testimonial card from the dashboard', function () {
         ->assertJsonPath('data.0.image', Storage::disk('public')->url($testimonial->image));
 });
 
-test('testimonial creation requires a card image', function () {
+test('admin can batch upload multiple testimonial cards', function () {
+    Storage::fake('public');
+
+    Livewire::test(TestimonialForm::class)
+        ->set('imageUploads', [
+            TemporaryUploadedFile::fake()->image('card-one.jpg', 800, 1000),
+            TemporaryUploadedFile::fake()->image('card-two.jpg', 800, 1000),
+            TemporaryUploadedFile::fake()->image('card-three.jpg', 800, 1000),
+        ])
+        ->set('sortOrder', '10')
+        ->set('status', PublicationStatus::Published->value)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertRedirect(route('testimonials'));
+
+    expect(Testimonial::count())->toBe(3)
+        ->and(Testimonial::orderBy('sort_order')->pluck('sort_order')->all())->toBe([10, 11, 12]);
+
+    $this->getJson('/api/testimonials')
+        ->assertOk()
+        ->assertJsonCount(3, 'data');
+});
+
+test('testimonial creation requires at least one card image', function () {
     Livewire::test(TestimonialForm::class)
         ->call('save')
-        ->assertHasErrors(['imageUpload' => 'required']);
+        ->assertHasErrors(['imageUploads']);
 
     expect(Testimonial::count())->toBe(0);
 });

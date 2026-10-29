@@ -3,14 +3,14 @@
     <x-slot:actions>
         <a href="{{ route('testimonials.create') }}" wire:navigate
            class="inline-flex items-center gap-1.5 rounded-lg bg-gold-500 px-4 py-2 text-sm font-semibold text-navy-900 shadow-sm transition hover:bg-gold-600 hover:text-white">
-            <x-icon name="plus" class="text-[16px]" /> New testimonial
+            <x-icon name="plus" class="text-[16px]" /> Upload cards
         </a>
     </x-slot:actions>
 </x-page-header>
 
 @if ($testimonials->isEmpty())
     <p class="rounded-2xl border border-dashed border-yellow-300 bg-white px-5 py-10 text-center text-sm text-gray-400">
-        No testimonials found. <a href="{{ route('testimonials.create') }}" class="font-medium text-gold-600 hover:underline">Upload a Canva card</a>.
+        No testimonials found. <a href="{{ route('testimonials.create') }}" class="font-medium text-gold-600 hover:underline">Upload Canva cards</a>.
     </p>
 @else
     <x-resource-table :columns="['Order', 'Added']">

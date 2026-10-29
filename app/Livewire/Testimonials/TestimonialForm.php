@@ -28,7 +28,15 @@ class TestimonialForm extends Component
     #[Validate(['required', 'string'])]
     public string $status = PublicationStatus::Draft->value;
 
+    /** Single replace upload when editing one card. */
     public ?TemporaryUploadedFile $imageUpload = null;
+
+    /**
+     * Batch create uploads — each file becomes its own testimonial card.
+     *
+     * @var array<int, TemporaryUploadedFile>
+     */
+    public array $imageUploads = [];
 
     public function mount(?Testimonial $testimonial = null): void
     {
@@ -44,17 +52,40 @@ class TestimonialForm extends Component
         $this->sortOrder = (string) (Testimonial::query()->max('sort_order') + 1);
     }
 
+    public function removeBatchImage(int $index): void
+    {
+        if (! array_key_exists($index, $this->imageUploads)) {
+            return;
+        }
+
+        array_splice($this->imageUploads, $index, 1);
+    }
+
+    public function clearBatchImages(): void
+    {
+        $this->imageUploads = [];
+        $this->resetErrorBag('imageUploads');
+        $this->resetErrorBag('imageUploads.*');
+    }
+
     public function save(): void
     {
-        $rules = [
+        if ($this->testimonial) {
+            $this->saveExisting();
+
+            return;
+        }
+
+        $this->saveBatch();
+    }
+
+    protected function saveExisting(): void
+    {
+        $this->validate([
             'sortOrder' => ['required', 'integer', 'min:0'],
             'status' => ['required', 'string'],
-            'imageUpload' => $this->testimonial
-                ? ['nullable', 'image', 'max:8192', 'mimes:jpg,jpeg,png,webp']
-                : ['required', 'image', 'max:8192', 'mimes:jpg,jpeg,png,webp'],
-        ];
-
-        $this->validate($rules);
+            'imageUpload' => ['nullable', 'image', 'max:8192', 'mimes:jpg,jpeg,png,webp'],
+        ]);
 
         $data = [
             'sort_order' => (int) $this->sortOrder,
@@ -77,18 +108,70 @@ class TestimonialForm extends Component
         }
 
         try {
-            $testimonial = $this->testimonial
-                ? tap($this->testimonial)->update($data)
-                : Testimonial::create($data);
+            $this->testimonial->update($data);
         } catch (\Throwable $exception) {
             report($exception);
-            $this->addError('imageUpload', 'Could not save this testimonial. Ask the developer to check storage/logs/laravel.log.');
+            $this->addError('imageUpload', 'Could not save this testimonial. Check storage/logs/laravel.log.');
 
             return;
         }
 
-        session()->flash('status', $this->testimonial ? 'Testimonial updated.' : 'Testimonial created.');
-        $this->redirectRoute('testimonials.edit', $testimonial, navigate: true);
+        session()->flash('status', 'Testimonial updated.');
+        $this->redirectRoute('testimonials.edit', $this->testimonial, navigate: true);
+    }
+
+    protected function saveBatch(): void
+    {
+        $this->validate([
+            'sortOrder' => ['required', 'integer', 'min:0'],
+            'status' => ['required', 'string'],
+            'imageUploads' => ['required', 'array', 'min:1', 'max:20'],
+            'imageUploads.*' => ['required', 'image', 'max:8192', 'mimes:jpg,jpeg,png,webp'],
+        ], [
+            'imageUploads.required' => 'Add at least one Canva card image.',
+            'imageUploads.min' => 'Add at least one Canva card image.',
+            'imageUploads.max' => 'Upload at most 20 cards at a time.',
+        ]);
+
+        $status = PublicationStatus::from($this->status);
+        $sortOrder = (int) $this->sortOrder;
+        $created = 0;
+        $failed = 0;
+
+        foreach ($this->imageUploads as $index => $upload) {
+            try {
+                Testimonial::create([
+                    'image' => ImageOptimizer::store($upload, 'testimonials'),
+                    'sort_order' => $sortOrder + $created,
+                    'status' => $status,
+                ]);
+                $created++;
+            } catch (\Throwable $exception) {
+                report($exception);
+                $failed++;
+                $this->addError(
+                    'imageUploads.'.$index,
+                    'Could not save “'.($upload->getClientOriginalName() ?: 'card').'”. Try a smaller JPG/PNG/WebP under 8 MB.'
+                );
+            }
+        }
+
+        if ($created === 0) {
+            $this->addError('imageUploads', 'No cards were saved. Check the files and try again.');
+
+            return;
+        }
+
+        $message = $created === 1
+            ? '1 testimonial card created.'
+            : "{$created} testimonial cards created.";
+
+        if ($failed > 0) {
+            $message .= " {$failed} failed.";
+        }
+
+        session()->flash('status', $message);
+        $this->redirectRoute('testimonials', navigate: true);
     }
 
     public function deleteStoredImage(?string $path = null): void

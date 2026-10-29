@@ -169,26 +169,39 @@ document.addEventListener('alpine:init', () => {
         };
     });
 
-    Alpine.data('imageUpload', (wire, model) => ({
+    Alpine.data('imageUpload', (wire, model, multiple = false) => ({
         busy: false,
+        multiple: Boolean(multiple),
 
-        async pick(file) {
-            if (! file) {
+        async pick(files) {
+            const list = files instanceof FileList
+                ? Array.from(files)
+                : [files].filter(Boolean);
+
+            if (list.length === 0) {
                 return;
             }
 
             this.busy = true;
 
             try {
-                wire.upload(
-                    model,
-                    file.size > UPLOAD_RECOMPRESS_OVER ? await optimiseForUpload(file) : file,
-                    () => { this.busy = false; },
-                    () => {
-                        this.busy = false;
-                        notify('Upload failed. Try a smaller image.', 'error');
-                    },
-                );
+                const prepared = [];
+
+                for (const file of list) {
+                    prepared.push(file.size > UPLOAD_RECOMPRESS_OVER ? await optimiseForUpload(file) : file);
+                }
+
+                const onDone = () => { this.busy = false; };
+                const onError = () => {
+                    this.busy = false;
+                    notify(this.multiple ? 'Upload failed. Try smaller images.' : 'Upload failed. Try a smaller image.', 'error');
+                };
+
+                if (this.multiple || prepared.length > 1) {
+                    wire.uploadMultiple(model, prepared, onDone, onError);
+                } else {
+                    wire.upload(model, prepared[0], onDone, onError);
+                }
             } catch {
                 this.busy = false;
                 notify('Could not read that image. Try a different file.', 'error');
