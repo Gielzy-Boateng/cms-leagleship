@@ -18,4 +18,6 @@ Route::get('pages', [PageController::class, 'index']);
 Route::get('pages/{page}', [PageController::class, 'show']);
 Route::get('testimonials', [TestimonialController::class, 'index']);
 Route::get('testimonials/{testimonial}', [TestimonialController::class, 'show']);
+Route::post('testimonials', [TestimonialController::class, 'store'])
+    ->middleware(['throttle:10,1', 'auth.basic.once']);
 Route::get('site', [SiteSettingController::class, 'show']);
